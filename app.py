@@ -23,10 +23,11 @@ def predict_age_and_gender(image):
     # Get the predicted age
     age = int(prediction[0])
     # Get the predicted gender
-    gender_prediction = model.predict_classes(image)
-    gender = gender_labels[gender_prediction[0][0]]
+    gender_prediction = model.predict(image)
+    gender_prob = gender_prediction[0][0]
+    gender_label = 'Male' if gender_prob < 0.5 else 'Female'
     # Return the predicted age and gender
-    return age, gender
+    return age, gender_label
 
 # Define the Streamlit app
 def app():
