@@ -49,7 +49,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Train the model
-epochs = 10
+epochs = 2
 history = model.fit(
   train_ds,
   validation_data=val_ds,
