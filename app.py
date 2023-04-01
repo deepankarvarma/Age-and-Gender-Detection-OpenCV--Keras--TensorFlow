@@ -3,7 +3,7 @@ import cv2
 import tensorflow as tf
 import numpy as np
 # Load the trained model
-model = tf.keras.models.load_model('E://VS Code Projects\Minor Projects//Image Processing Projects//Age and Gender Detection-OpenCV, Keras, TensorFlow//age_gender_prediction_model.h5')
+model = tf.keras.models.load_model('age_gender_prediction_model.h5')
 
 # Define the labels for gender prediction
 gender_labels = ['Male', 'Female']
