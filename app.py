@@ -1,51 +1,50 @@
 import streamlit as st
-import cv2
 import tensorflow as tf
+import cv2
 import numpy as np
-# Load the trained model
+
+# Load the model
 model = tf.keras.models.load_model('age_gender_prediction_model.h5')
 
-# Define the labels for gender prediction
-gender_labels = ['Male', 'Female']
+# Define the image parameters
+IMG_WIDTH, IMG_HEIGHT = 200, 200
 
-# Define the function to make predictions
-def predict_age_and_gender(image):
-    # Resize the image
-    resized_image = cv2.resize(image, (200, 200))
-    # Convert to float32
-    image = np.float32(resized_image)
-    # Normalize the image
-    image /= 255.0
-    # Add batch dimension
+# Define a function to preprocess the image
+def preprocess_image(image):
+    image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+    image = image.astype('float32') / 255.0
     image = np.expand_dims(image, axis=0)
-    # Make the prediction
-    prediction = model.predict(image)
-    # Get the predicted age
-    age = int(prediction[0])
-    # Get the predicted gender
-    gender_prediction = model.predict(image)
-    gender_prob = gender_prediction[0][0]
-    gender_label = 'Male' if gender_prob < 0.5 else 'Female'
-    # Return the predicted age and gender
-    return age, gender_label
+    return image
+
+# Define a function to predict the age and gender of an image
+def predict_age_gender(image):
+    # Preprocess the image
+    image = preprocess_image(image)
+    # Predict the gender (0 = male, 1 = female)
+    gender_pred = 'Female' if model.predict(image)[0] > 0.5 else 'Male'
+    # Predict the age
+    age_pred = int(model.predict(image) * 100)
+    return gender_pred, age_pred
+
 
 # Define the Streamlit app
 def app():
     # Set the app title
-    st.set_page_config(page_title='Age and Gender Prediction', page_icon='👴👩')
-    st.title('Age and Gender Prediction')
-    
-    # Allow the user to upload an image
-    uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
-    if uploaded_file is not None:
-        # Load the image
-        image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        # Make the prediction
-        age, gender = predict_age_and_gender(image)
-        # Display the image and prediction
-        st.image(image, caption=f'Predicted Age: {age}, Predicted Gender: {gender}', use_column_width=True)
+    st.title('Age and Gender Prediction App')
 
-# Run the Streamlit app
+    # Upload an image
+    image_file = st.file_uploader('Upload an image', type=['jpg', 'jpeg', 'png'])
+    if image_file is not None:
+        # Read the image file and convert it to an array
+        image = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        # Display the image
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+        # Predict the age and gender
+        gender_pred, age_pred = predict_age_gender(image)
+        # Display the results
+        st.write('Gender Prediction: ', gender_pred)
+        st.write('Age Prediction: ', age_pred)
+
 if __name__ == '__main__':
     app()
